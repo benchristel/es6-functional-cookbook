@@ -70,6 +70,118 @@ In addition, getting good at functional programming will make you a better progr
 - You'll learn to decompose complex tasks into small building blocks that can be reused.
 - You'll add new patterns to your programming vocabulary which will help you design systems in *any* language or framework, not just functional ones.
 
+## What's so great about ES6?
+
+It's always been possible to write functional code in JavaScript, but it hasn't been *fun* until ECMAScript 6.
+
+ES6 introduces many, many features to JavaScript, but the ones that are most relevant for functional programming are **arrow functions**, **destructuring assignment**, and **tail call optimization**.
+
+### Arrow Functions
+
+Arrow functions are like traditional JavaScript functions, but provide a very terse syntax (they also provide lexical binding of the `this` keyword, but that's irrelevant for FP purposes).
+
+```javascript
+// before ES6
+
+var square = function(x) {
+  return x * x
+}
+
+// after
+ 
+let square = x => x * x
+```
+
+The arrow syntax degrades gracefully in more general cases. When the body of the function has multiple statements, the curly braces and `return` keyword come back:
+
+```javascript
+var cube = x => {
+  let squared = square(x)
+
+  return squared * x
+}
+```
+
+When there are multiple parameters, they need to be surrounded by parens. Parens are also required when there are no parameters.
+
+```javascript
+let add = (x, y) => x + y
+
+let getName = () => 'satoshi'
+```
+
+As the `square` function above illustrates, the arrow syntax works best when the function has exactly one parameter and its implementation is a single expression. Keeping in mind that arrow functions are themselves expressions, can you figure out what the code below does?
+
+```javascript
+let greet = greeting => name => greeting + ' ' + name
+```
+
+The `greet` function is identical in functionality to the `createGreeter` example above. The `=>` operator is right-associative, so the example parses as:
+
+```javascript
+let greet = (greeting => (name => (greeting + ' ' + name)))
+```
+
+We can call the `greet` function like this:
+
+```javascript
+greet('hello')('satoshi') // returns 'hello satoshi'
+```
+
+Functions that use this pattern of a series of one-argument calls are called _curried_ functions, after the mathematician Haskell Curry.
+
+Why use curried functions when we could just make a function that takes two arguments, like `greet('hello', 'satoshi')`? The advantage of currying is that the intermediate result is often useful in itself, and can be saved for later use by assigning it to a variable.
+
+```javascript
+let greetInEnglish = greet('hello')
+let greetInJapanese = greet('konnichiwa')
+
+greetInJapanese('satoshi-san') // returns 'konnichiwa satoshi-san'
+```
+
+Rather than duplicating the strings for different greetings all over your codebase, you can create a function for each type of greeting.
+
+This is only a minor advantage of curried functions, however. Their real power lies in their _composability_. Many examples of this appear in the cookbook.
+
+### Destructuring Assignment
+
+**Destructuring Assignment** allows you to easily pull values out of objects and arrays and assign them to local variables.
+
+```javascript
+let formatLocation = ([lat, long]) => lat + ', ' + long
+
+let sanFrancisco = [37.7749, -122.4194]
+
+formatLocation(sanFrancisco)
+```
+
+The **spread operator** `...` extracts the remaining values from an array. This is extremely useful for writing recursive algorithms.
+
+```javascript
+let joinOnCommas = (items) => {
+  let [first, second, ...rest] = items
+  if (items.length === 0) {
+    return ''
+  } else if (items.length === 1) {
+    return first
+  } else if (items.length === 2) {
+    return first + ', ' + second
+  } else {
+    return joinOnCommas([first + ', ' + second, ...rest])
+  }
+}
+
+joinOnCommas(['Kermit', 'Piggy', 'Gonzo']) // returns 'Kermit, Piggy, Gonzo'
+```
+
+### Tail Call Optimization
+
+Recursive algorithms in general have the unfortunate property that they can grow the call stack to arbitrary lengths, potentially causing the program to run out of stack memory and crash. Tail call optimization provides a way around this problem.
+
+A function call to _f_ is in _tail position_ if its caller doesn't do anything after calling _f_ (returning _f_'s return value doesn't count as doing something). If a function is called in tail position, its caller's stack frame can be popped before the new stack frame is added. This keeps the stack at a constant size. This trick is called **tail call optimization**.
+
+ES6 adds this optimization to JavaScript, allowing recursive algorithms to operate on very large data structures.
+
 ## Creating Pipelines
 
 ```javascript
