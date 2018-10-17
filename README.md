@@ -6,6 +6,10 @@ The code in this document is licensed under the WTFPL, which basically means you
 
 ## What is this, how you say, Functional Programming?
 
+Functional programming is a complex and diverse discipline, but at the risk of oversimplifying I'd say there are three key points that set it apart from other programming paradigms: **first-class functions**, **absence of side effects**, and **immutable data**. I'll talk about these in more detail below.
+
+## First-class Functions
+
 To qualify as "functional", a language must treat functions as first-class objects. That means that functions can be assigned to variables, passed to other functions as arguments, and returned from functions.
 
 Here's how that looks in JavaScript:
@@ -57,11 +61,29 @@ The functions in functional languages always have two properties that make them 
 
 Functions with these two properties are often called _lambdas_. This term is borrowed from the lambda calculus, a mathematical formalism that preceded the implementation of these concepts in programming languages.
 
+### No Side Effects
+
+Functions in functional programming are *pure*, which is to say they have no *side effects*. Pure functions are not allowed to write to disk, display graphics on screen, read input from the keyboard, or talk to the network.
+
+At first, this seems limiting, even absurdly so. And taken to absolute extremes, it *is* absurd. 
+But since we need our programs to, you know, actually do stuff, no functional language is *quite* that extreme.
+Functional programs are always embedded in an imperative (i.e. not-functional) environment, which can take care of updating state and interacting with keyboards and files and all those messy real-world things. When any external events (like mouse clicks or keyboard input) arrive, the imperative environment simply calls a function to ask the program what should happen next. This means that instead of *doing stuff itself* the program can simply *answer a question*—which actually sounds a lot easier than doing stuff, right?
+
+For further reading, check out the [Elm Architecture](https://guide.elm-lang.org/architecture/).
+
+### Immutable Data
+
+In functional programming, values cannot be changed once they are initialized. Variables aren't really *variable* (once you set 'em they're stuck with the value you set) and mutating objects is a no-no.
+
+As constraining as this sounds, it's actually kind of nice. It means you never get "spooky action at a distance" where some object that's being used by one part of your program gets changed by another part and then weird bugs happen. It means that you can cache values quite cheaply, just by storing a reference, and you never have to worry that someone will mutate the value while it's in the cache. And it means you usually don't have to think about an object's *identity*—its actual location in memory. The only property of an object that matters is the data it contains.
+
+It does have some surprising consequences, though. Pure functional languages have no `for` loops or `while` loops. They can't, because loops only make sense if some state is changing inside the loop body. Instead of looping, you have to use recursion. But don't worry, functional languages usually have lots of helper functions that make it delightfully easy to do most of the things you'd normally do with loops.
+
 ## Why should you care? 
 
 Code written in a functional style has some nice properties.
 
-- **Data in, data out**: A _pure function_ takes a value and returns a value, with no side effects. This makes it very easy to test, since there are no side-effecting dependencies to mock.
+- **Data in, data out**: A pure function takes a value and returns a value, with no side effects. This makes it very easy to test, since there are no side-effecting dependencies to mock.
 - **Referential transparency**: Calling a pure function is equivalent to copy-pasting its implementation into the callsite and substituting the values of its arguments for their parameter names. This makes functional code easier to reason about and easier to refactor; you never have to worry about whether it's safe to inline a function call.
 - **Nilpotency**: Since pure functions have no side effects, caching their results has no effect on the correctness of your code. It's easy to optimize functional code if you notice performance problems.
 
